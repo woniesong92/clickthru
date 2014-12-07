@@ -1,6 +1,8 @@
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC as SupportVectorClassifier
 import numpy as np
 import pdb
+import time
 
 class Classifier():
 	def parse_examples(self, file_name):
@@ -33,14 +35,16 @@ class Classifier():
 	def get_knn_classifier(self, train_examples):
 		knn = KNeighborsClassifier()
 		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(train_examples)
-		
 		knn.fit(feature_vectors, click_labels)
-		
 		return knn
 
-	def classify_with_knn(self, knn_classifier, test_examples):
-		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
-		predicted_labels = knn_classifier.predict(feature_vectors)
+	def get_svm_classifier(self, train_examples):
+		svm = SupportVectorClassifier()
+		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(train_examples)
+		svm.fit(feature_vectors, click_labels)
+		return svm
+
+	def classify_helper(self, example_ids, click_labels, predicted_labels):
 		num_correct = 0
 		num_examples = len(predicted_labels)
 		for idx, predicted_label in enumerate(predicted_labels):
@@ -52,6 +56,27 @@ class Classifier():
 		accuracy = num_correct / float(num_examples)
 		print "ACCURACY:", accuracy
 		return accuracy
+
+	def classify_with_knn(self, knn_classifier, test_examples):
+		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
+		predicted_labels = knn_classifier.predict(feature_vectors)
+		return self.classify_helper(example_ids, click_labels, predicted_labels)
+		# num_correct = 0
+		# num_examples = len(predicted_labels)
+		# for idx, predicted_label in enumerate(predicted_labels):
+		# 	example_id = example_ids[idx]
+		# 	expected_label = click_labels[idx]
+		# 	if expected_label == predicted_label:
+		# 		num_correct += 1
+		# 	print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
+		# accuracy = num_correct / float(num_examples)
+		# print "ACCURACY:", accuracy
+		# return accuracy
+
+	def classify_with_svm(self, svm_classifier, test_examples):
+		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
+		predicted_labels = svm_classifier.predict(feature_vectors)
+		return classify_helper(example_ids, click_labels, predicted_labels)
 
 	def _encoder(self, s):
 		if s.isdigit():
@@ -66,14 +91,21 @@ class Classifier():
 			return ''.join(lst)
 
 def main():
+	start_time = time.time()
 	classifier = Classifier()
-	train_examples = classifier.parse_examples("data/train_1000000_lines")
+	train_examples = classifier.parse_examples("data/train_100000_lines")
 	test_examples = classifier.parse_examples("data/test_100000_lines")
 	print "Parsing is done, now knn will be trained..."
 	knn = classifier.get_knn_classifier(train_examples)
 	print "KNN is ready. Now classification process will begin..."
 	accuracy = classifier.classify_with_knn(knn, test_examples)
+	print "prepare for SVM..."
+	#svm = classifier.get_svm_classifier(train_examples)
+	print "SVM is ready. Now classification process will begin..."
+	#accuracy = classifier.classify_with_svm(svm, test_examples)
 	print "========DONE=========="
+	time_diff = (time.time() - start_time)
+	print("It took %s Seconds.." % time_diff)
 
 if __name__ == "__main__":
     main()
