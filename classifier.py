@@ -67,9 +67,11 @@ class Classifier():
 
 def main():
 	classifier = Classifier()
-	train_examples = classifier.parse_examples("train_100000_lines")
-	test_examples = classifier.parse_examples("test_100000_lines")
+	train_examples = classifier.parse_examples("data/train_1000000_lines")
+	test_examples = classifier.parse_examples("data/test_100000_lines")
+	print "Parsing is done, now knn will be trained..."
 	knn = classifier.get_knn_classifier(train_examples)
+	print "KNN is ready. Now classification process will begin..."
 	accuracy = classifier.classify_with_knn(knn, test_examples)
 	print "========DONE=========="
 
