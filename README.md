@@ -16,6 +16,8 @@ Predict whether a certain advertisement will be clicked, based on certain featur
 - device_conn_type
 - C14-C21 -- anonymized categorical variables
 
+Installation: pip install -r requirements.txt
+
 Link: https://www.kaggle.com/c/avazu-ctr-prediction/
 Download Data: https://www.kaggle.com/c/avazu-ctr-prediction/
 (Only download train.gz)

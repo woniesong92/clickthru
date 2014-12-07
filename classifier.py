@@ -52,7 +52,7 @@ class Classifier():
 			expected_label = click_labels[idx]
 			if expected_label == predicted_label:
 				num_correct += 1
-			print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
+			# print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
 		accuracy = num_correct / float(num_examples)
 		print "ACCURACY:", accuracy
 		return accuracy
@@ -76,7 +76,7 @@ class Classifier():
 	def classify_with_svm(self, svm_classifier, test_examples):
 		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
 		predicted_labels = svm_classifier.predict(feature_vectors)
-		return classify_helper(example_ids, click_labels, predicted_labels)
+		return self.classify_helper(example_ids, click_labels, predicted_labels)
 
 	def _encoder(self, s):
 		if s.isdigit():
@@ -100,9 +100,9 @@ def main():
 	print "KNN is ready. Now classification process will begin..."
 	accuracy = classifier.classify_with_knn(knn, test_examples)
 	print "prepare for SVM..."
-	#svm = classifier.get_svm_classifier(train_examples)
+	svm = classifier.get_svm_classifier(train_examples)
 	print "SVM is ready. Now classification process will begin..."
-	#accuracy = classifier.classify_with_svm(svm, test_examples)
+	accuracy = classifier.classify_with_svm(svm, test_examples)
 	print "========DONE=========="
 	time_diff = (time.time() - start_time)
 	print("It took %s Seconds.." % time_diff)
