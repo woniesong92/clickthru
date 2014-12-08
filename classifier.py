@@ -3,6 +3,7 @@ from sklearn.svm import SVC as SupportVectorClassifier
 import numpy as np
 import pdb
 import time
+from sys import argv
 
 class Classifier():
 	def parse_examples(self, file_name):
@@ -10,9 +11,30 @@ class Classifier():
 		with open(file_name, 'rb') as f:
 			for line_number, line in enumerate(f):
 				example = line.strip().split(",")
-				print line_number
+				# print line_number
 				examples.append(example)
 		return examples
+
+	def feature_selector1(self, feature_vector):
+		(hour, c1, banner_pos, site_id, site_domain, site_category, app_id,
+			app_domain, app_category, device_id, device_ip, device_model, device_type, device_conn_type,
+			c14,c15,c16,c17,c18,c19,c20,c21) = feature_vector
+		new_feature_vector = (c14,c15,c16,c17,c18,c19,c20,c21)
+		return new_feature_vector
+
+	def feature_selector2(self, feature_vector):
+		(hour, c1, banner_pos, site_id, site_domain, site_category, app_id,
+			app_domain, app_category, device_id, device_ip, device_model, device_type, device_conn_type,
+			c14,c15,c16,c17,c18,c19,c20,c21) = feature_vector
+		new_feature_vector = (hour,c1,banner_pos,site_category,app_category)
+		return new_feature_vector
+
+	def feature_selector3(self, feature_vector):
+		(hour, c1, banner_pos, site_id, site_domain, site_category, app_id,
+			app_domain, app_category, device_id, device_ip, device_model, device_type, device_conn_type,
+			c14,c15,c16,c17,c18,c19,c20,c21) = feature_vector
+		new_feature_vector = (c1,c14,c15,c16,c17,c18,c19,c20,c21)
+		return new_feature_vector
 
 	def separate_features_and_labels(self, examples):
 		example_ids = []
@@ -29,6 +51,9 @@ class Classifier():
 			feature_vector = (hour, c1, banner_pos, self._encoder(site_id), self._encoder(site_domain), self._encoder(site_category),
 				self._encoder(app_id), self._encoder(app_domain), self._encoder(app_category), self._encoder(device_id), self._encoder(device_ip),
 				self._encoder(device_model), device_type, device_conn_type, c14,c15,c16,c17,c18,c19,c20,c21)
+			
+			feature_vector = self.feature_selector3(feature_vector)
+
 			feature_vectors.append(feature_vector)
 		return (example_ids, click_labels, feature_vectors)
 
@@ -52,7 +77,7 @@ class Classifier():
 			expected_label = click_labels[idx]
 			if expected_label == predicted_label:
 				num_correct += 1
-			# print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
+			#print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
 		accuracy = num_correct / float(num_examples)
 		print "ACCURACY:", accuracy
 		return accuracy
@@ -61,17 +86,6 @@ class Classifier():
 		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
 		predicted_labels = knn_classifier.predict(feature_vectors)
 		return self.classify_helper(example_ids, click_labels, predicted_labels)
-		# num_correct = 0
-		# num_examples = len(predicted_labels)
-		# for idx, predicted_label in enumerate(predicted_labels):
-		# 	example_id = example_ids[idx]
-		# 	expected_label = click_labels[idx]
-		# 	if expected_label == predicted_label:
-		# 		num_correct += 1
-		# 	print "EXPECTED:", expected_label, "PREDICTED:", predicted_label
-		# accuracy = num_correct / float(num_examples)
-		# print "ACCURACY:", accuracy
-		# return accuracy
 
 	def classify_with_svm(self, svm_classifier, test_examples):
 		example_ids, click_labels, feature_vectors = self.separate_features_and_labels(test_examples)
@@ -93,23 +107,30 @@ class Classifier():
 def main():
 	start_time = time.time()
 	classifier = Classifier()
-	train_examples = classifier.parse_examples("data/train_100000_lines")
-	test_examples = classifier.parse_examples("data/test_100000_lines")
+	train_examples_file_name = "data/train_100000_lines"
+	# test_examples_file_name = "data/test_428968_lines"
+	test_examples_file_name = "data/test_428968_lines_ones_only"
+	if len(argv) > 1:
+		train_examples_file_name = argv[1]
+	if len(argv) > 2:
+		test_examples_file_name = argv[2]
+	print "TRAIN:", train_examples_file_name, "TEST:", test_examples_file_name
+	train_examples = classifier.parse_examples(train_examples_file_name)
+	test_examples = classifier.parse_examples(test_examples_file_name)
 	print "Parsing is done, now knn will be trained..."
 	knn = classifier.get_knn_classifier(train_examples)
 	print "KNN is ready. Now classification process will begin..."
 	accuracy = classifier.classify_with_knn(knn, test_examples)
-	print "prepare for SVM..."
-	svm = classifier.get_svm_classifier(train_examples)
-	print "SVM is ready. Now classification process will begin..."
-	accuracy = classifier.classify_with_svm(svm, test_examples)
+	# print "prepare for SVM..."
+	# svm = classifier.get_svm_classifier(train_examples)
+	# print "SVM is ready. Now classification process will begin..."
+	# accuracy = classifier.classify_with_svm(svm, test_examples)
 	print "========DONE=========="
 	time_diff = (time.time() - start_time)
 	print("It took %s Seconds.." % time_diff)
 
 if __name__ == "__main__":
     main()
-
 
 
 
